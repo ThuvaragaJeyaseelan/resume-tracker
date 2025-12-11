@@ -1,0 +1,16 @@
+John Doe
+Email: john.doe@email.com
+Phone: 555-123-4567
+
+Summary:
+Experienced software developer with 5 years of experience in JavaScript, Python, and cloud technologies.
+
+Experience:
+Senior Developer at Tech Corp (2020-Present)
+- Led development of microservices architecture
+- Managed team of 4 developers
+
+Skills: JavaScript, TypeScript, Python, AWS, Docker, React
+
+Education:
+BS Computer Science, State University, 2018

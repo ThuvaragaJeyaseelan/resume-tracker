@@ -1,0 +1,18 @@
+John Doe
+john.doe@email.com
+555-123-4567
+
+Senior Software Engineer with 8 years experience in full-stack development.
+
+EXPERIENCE:
+Tech Lead at Google (2020-2024)
+- Led team of 12 engineers
+- Architected microservices handling 1M requests/day
+
+Senior Developer at Microsoft (2016-2020)
+- Built Azure cloud features
+- Mentored 5 junior developers
+
+SKILLS: JavaScript, TypeScript, Python, Go, AWS, Docker, Kubernetes, React, Node.js
+
+EDUCATION: MS Computer Science, Stanford University 2016
