@@ -13,12 +13,26 @@ def api_root(request):
     """API root endpoint with available endpoints."""
     return Response({
         'message': 'ATS Resume Tracker API',
-        'version': '1.0.0',
+        'version': '2.0.0',
         'endpoints': {
             'health': '/api/health/',
+            'auth': {
+                'signup': '/api/auth/signup',
+                'login': '/api/auth/login',
+                'profile': '/api/auth/profile',
+                'refresh': '/api/auth/refresh',
+            },
+            'jobs': {
+                'list': '/api/jobs/',
+                'create': '/api/jobs/',
+                'detail': '/api/jobs/{id}/',
+                'applicants': '/api/jobs/{id}/applicants/',
+                'public_list': '/api/jobs/public/',
+                'public_detail': '/api/jobs/public/{id}/',
+                'apply': '/api/jobs/{id}/apply/',
+            },
             'applicants': {
                 'list': '/api/applicants/',
-                'upload': '/api/applicants/upload',
                 'stats': '/api/applicants/stats/',
                 'detail': '/api/applicants/{id}/',
                 'download': '/api/applicants/{id}/resume/',
@@ -57,6 +71,8 @@ def health_check(request):
 urlpatterns = [
     path('', api_root, name='api-root'),
     path('api/health/', health_check, name='health-check'),
+    path('api/auth/', include('auth.urls')),
+    path('api/jobs/', include('jobs.urls')),
     path('api/applicants/', include('applicants.urls')),
 ]
 

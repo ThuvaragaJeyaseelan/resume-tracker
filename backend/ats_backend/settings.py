@@ -27,6 +27,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'core',
+    'auth',
+    'jobs',
     'applicants',
 ]
 
@@ -34,6 +36,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'core.middleware.RequestIDMiddleware',
+    'auth.middleware.JWTAuthenticationMiddleware',
 ]
 
 ROOT_URLCONF = 'ats_backend.urls'
@@ -109,6 +112,10 @@ SUPABASE_KEY = os.getenv('SUPABASE_KEY', '')
 
 # Gemini AI Configuration
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '')
+
+# JWT Configuration
+JWT_SECRET = os.getenv('JWT_SECRET', SECRET_KEY)
+JWT_EXPIRATION_HOURS = int(os.getenv('JWT_EXPIRATION_HOURS', 24))
 
 # Create uploads directory if it doesn't exist
 os.makedirs(UPLOAD_DIR, exist_ok=True)
