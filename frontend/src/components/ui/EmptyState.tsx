@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ReactNode } from "react";
 
 interface EmptyStateProps {
   icon?: ReactNode;
@@ -7,7 +7,12 @@ interface EmptyStateProps {
   action?: ReactNode;
 }
 
-export function EmptyState({ icon, title, description, action }: EmptyStateProps) {
+export function EmptyState({
+  icon,
+  title,
+  description,
+  action,
+}: EmptyStateProps) {
   return (
     <div className="text-center py-12">
       {icon && (
@@ -23,4 +28,3 @@ export function EmptyState({ icon, title, description, action }: EmptyStateProps
 }
 
 export default EmptyState;
-
