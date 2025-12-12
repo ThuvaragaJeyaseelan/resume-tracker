@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "ats_backend/wsgi.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "15mb"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "ats_backend/wsgi.py"
+    }
+  ],
+  "functions": {
+    "ats_backend/wsgi.py": {
+      "runtime": "python3.9"
+    }
+  },
+  "env": {
+    "DJANGO_SETTINGS_MODULE": "ats_backend.settings"
+  }
+}

@@ -1,13 +1,22 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import type { ReactNode } from 'react';
-import type { AuthState, LoginInput, SignupInput } from '../types';
-import * as api from '../services/api';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
+import type { ReactNode } from "react";
+import type { AuthState, LoginInput, SignupInput } from "../types";
+import * as api from "../services/api";
 
 interface AuthContextType extends AuthState {
   login: (input: LoginInput) => Promise<void>;
   signup: (input: SignupInput) => Promise<void>;
   logout: () => void;
-  updateProfile: (data: { fullName?: string; companyName?: string }) => Promise<void>;
+  updateProfile: (data: {
+    fullName?: string;
+    companyName?: string;
+  }) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -84,13 +93,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const updateProfile = useCallback(async (data: { fullName?: string; companyName?: string }) => {
-    const updatedRecruiter = await api.updateProfile(data);
-    setState((prev) => ({
-      ...prev,
-      recruiter: updatedRecruiter,
-    }));
-  }, []);
+  const updateProfile = useCallback(
+    async (data: { fullName?: string; companyName?: string }) => {
+      const updatedRecruiter = await api.updateProfile(data);
+      setState((prev) => ({
+        ...prev,
+        recruiter: updatedRecruiter,
+      }));
+    },
+    []
+  );
 
   return (
     <AuthContext.Provider
@@ -110,10 +122,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }
 
 export default AuthContext;
-
