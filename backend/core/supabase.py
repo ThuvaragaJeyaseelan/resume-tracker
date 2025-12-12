@@ -33,7 +33,8 @@ def get_supabase_client() -> Client:
             )
         
         _supabase_client = create_client(url, key)
-    
+        print(f"✅ Database connected successfully to Supabase project: {url.split('//')[1].split('.')[0]}")
+
     return _supabase_client
 
 
