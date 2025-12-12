@@ -7,6 +7,14 @@ AI-powered Applicant Tracking System with recruiter authentication, job posting 
 ![Database](https://img.shields.io/badge/Database-Supabase%20(PostgreSQL)-3ECF8E?logo=supabase)
 ![AI](https://img.shields.io/badge/AI-Google%20Gemini%202.0-4285F4?logo=google)
 
+## Live Demo
+
+🚀 **[https://resume-tracker-mu.vercel.app/](https://resume-tracker-mu.vercel.app/)**
+
+**Test Credentials:**
+- Email: `john99@gmail.com`
+- Password: `john#932`
+
 ## Features
 
 ### For Recruiters
@@ -27,6 +35,86 @@ AI-powered Applicant Tracking System with recruiter authentication, job posting 
 - **Job Matching**: Score candidates (0-100) based on job requirements
 - **Match Insights**: Identify matching skills and skill gaps
 - **Smart Prioritization**: Rank applicants by relevancy
+
+## Design Decisions
+
+### Technology Choices
+- **Django**: Chosen for rapid development, excellent ORM abstraction, and strong ecosystem. Preferred over Golang/Rust for faster prototyping within assignment timeframe.
+- **React + TypeScript**: Type safety reduces bugs, React's component model scales well. TypeScript catches errors at compile time.
+- **Supabase**: Managed PostgreSQL with instant APIs, reduces infrastructure overhead. Real-time capabilities for future features.
+- **Gemini 2.0 Flash**: Fast, cost-effective, excellent at structured resume parsing. Multimodal capabilities for future enhancements.
+- **Vercel**: Zero-config deployment, serverless functions, automatic HTTPS. Fast iteration cycles.
+
+### Architecture Decisions
+- **No candidate authentication**: Reduces friction in application process. Email-based tracking is sufficient.
+- **JWT tokens**: Stateless auth, scales horizontally, no session management needed.
+- **Modular Django apps**: Separation of concerns (auth/jobs/applicants/core) enables independent testing and future scaling.
+- **AI-first scoring**: Addresses core problem - sorting hundreds of applicants. Manual review would bottleneck recruiters.
+
+### UX Priorities
+- **AI scoring front and center**: Recruiters see relevancy scores immediately, not buried in details.
+- **Public job board**: Candidates browse without signup, mimicking real job boards.
+- **Status pipeline**: Visual tracking of candidates through hiring stages.
+
+## Assumptions
+
+- **Scale**: Designed for hundreds of applications per job, not thousands (Gemini rate limits)
+- **Resume format**: Candidates submit standard formats (PDF/DOC). No LinkedIn imports or profile builders.
+- **Security**: JWT auth sufficient for MVP. OAuth/2FA not needed initially.
+- **Storage**: Local file storage for development. Production would use Supabase Storage or S3.
+- **Workflow**: Recruiters work solo, no team collaboration features (comments, assignments).
+- **Compliance**: GDPR/data retention not implemented (would need in production).
+- **Interview scheduling**: Out of scope. Recruiters contact candidates externally.
+- **Notifications**: Email notifications not included (would add SendGrid/Postmark).
+
+## AI Tools Used
+
+- **Cursor AI**: Code generation, refactoring, debugging. Helped scaffold Django apps, React components, and API endpoints.
+- **ChatGPT**: Architecture decisions, debugging complex issues, optimizing AI prompts for resume parsing.
+
+## Feature Prioritization
+
+### Why These Features?
+
+**High Priority (Implemented):**
+- ✅ AI-powered candidate scoring - Core value proposition for sorting hundreds of applicants
+- ✅ Job posting CRUD - Basic requirement for any ATS
+- ✅ Public job board - Enables candidate applications
+- ✅ Resume upload & parsing - Automates data entry
+- ✅ Status tracking - Essential for managing hiring pipeline
+
+**Medium Priority (Deferred):**
+- ⏳ Email notifications - Adds complexity, can be done manually initially
+- ⏳ Advanced filters - Basic search is sufficient for MVP
+- ⏳ Team collaboration - Solo recruiter workflow is simpler
+
+**Low Priority (Out of Scope):**
+- ❌ Interview scheduling - Integrate Calendly/external tools
+- ❌ Offer management - Too complex for timeframe
+- ❌ Analytics dashboard - Nice-to-have, not essential
+
+### With More Time, I Would Add:
+
+1. **Email notifications** - Automated updates to candidates and recruiters
+2. **Bulk actions** - Reject/shortlist multiple candidates at once
+3. **Resume storage in cloud** - Supabase Storage integration instead of local files
+4. **Advanced search** - Filter by skills, experience years, location
+5. **Team features** - Share notes, assign reviewers, collaborative hiring
+6. **Interview scheduling** - Calendar integration for booking interviews
+7. **Analytics dashboard** - Hiring funnel metrics, time-to-hire, source tracking
+8. **Export functionality** - Download applicant lists as CSV/Excel
+9. **Custom job application forms** - Per-job screening questions
+10. **Mobile responsiveness** - Optimize UI for mobile recruiters
+
+## Known Limitations
+
+- **File storage**: Resumes stored locally on backend server. Won't persist on Vercel serverless (needs cloud storage).
+- **Rate limits**: Gemini API has rate limits. Bulk resume analysis may fail with too many concurrent uploads.
+- **No real-time updates**: Dashboard doesn't auto-refresh when new applicants arrive. Requires manual refresh.
+- **Single recruiter context**: No multi-tenancy isolation beyond recruiter_id foreign keys.
+- **Resume parsing accuracy**: AI may misinterpret non-standard resume formats or creative designs.
+- **No resume preview**: Recruiters must download to view. In-browser PDF viewer would improve UX.
+- **Static file serving**: Django collectstatic not configured for Vercel. Static files served differently in production.
 
 ## Architecture
 
