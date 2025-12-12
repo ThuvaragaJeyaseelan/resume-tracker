@@ -100,7 +100,13 @@ REST_FRAMEWORK = {
 }
 
 # File Upload Configuration
-UPLOAD_DIR = os.path.join(BASE_DIR, os.getenv('UPLOAD_DIR', 'uploads'))
+if os.getenv('VERCEL'):
+    # Use /tmp for serverless environments (only writable location)
+    UPLOAD_DIR = '/tmp/uploads'
+else:
+    # Use configured directory for development/local
+    UPLOAD_DIR = os.path.join(BASE_DIR, os.getenv('UPLOAD_DIR', 'uploads'))
+
 MAX_UPLOAD_SIZE = int(os.getenv('MAX_UPLOAD_SIZE', 10 * 1024 * 1024))  # 10MB default
 
 ALLOWED_UPLOAD_TYPES = [
@@ -110,8 +116,11 @@ ALLOWED_UPLOAD_TYPES = [
     'text/plain',
 ]
 
-# Create uploads directory if it doesn't exist (skip in serverless)
-if not os.getenv('VERCEL'):
+# Create uploads directory if it doesn't exist
+# Always create /tmp/uploads in serverless, skip local directory creation if VERCEL=1
+if os.getenv('VERCEL'):
+    os.makedirs('/tmp/uploads', exist_ok=True)
+elif not os.getenv('VERCEL'):
     os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 # Supabase Configuration
