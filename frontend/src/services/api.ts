@@ -321,6 +321,11 @@ export const downloadResume = async (applicantId: string): Promise<Blob> => {
   return response.data;
 };
 
+export const getResumeDownloadUrl = (applicantId: string): string => {
+  const token = getStoredToken();
+  return `${API_BASE_URL}/api/applicants/${applicantId}/resume/?token=${token}`;
+};
+
 // ============================================
 // Health Check
 // ============================================
