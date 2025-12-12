@@ -139,13 +139,13 @@ The AI system addresses the fundamental recruiter challenge: **screening hundred
 
 ## Known Limitations
 
-- **File storage**: Resumes stored locally on backend server. Won't persist on Vercel serverless (needs cloud storage).
+- **File storage in Vercel**: Uses `/tmp/uploads` (temporary storage). Files don't persist between function calls, so resume downloads may fail after deployment restart. Production should use Supabase Storage or cloud storage.
 - **Rate limits**: Gemini API has rate limits. Bulk resume analysis may fail with too many concurrent uploads.
 - **No real-time updates**: Dashboard doesn't auto-refresh when new applicants arrive. Requires manual refresh.
 - **Single recruiter context**: No multi-tenancy isolation beyond recruiter_id foreign keys.
 - **Resume parsing accuracy**: AI may misinterpret non-standard resume formats or creative designs.
 - **No resume preview**: Recruiters must download to view. In-browser PDF viewer would improve UX.
-- **Static file serving**: Django collectstatic not configured for Vercel. Static files served differently in production.
+- **Local development**: File storage works locally but requires `VERCEL=1` environment variable for Vercel deployment.
 
 ## Architecture
 
@@ -288,6 +288,9 @@ GEMINI_API_KEY=your-gemini-api-key
 
 JWT_SECRET=your-jwt-secret-key
 JWT_EXPIRATION_HOURS=24
+
+# For Vercel deployment only:
+# VERCEL=1
 ```
 
 ### 3. Frontend Setup
@@ -320,6 +323,35 @@ npm run dev
 
 - Frontend: http://localhost:5173
 - Backend API: http://localhost:8000
+
+## Vercel Deployment
+
+### Backend Environment Variables (Vercel Dashboard)
+
+For production deployment on Vercel, set these environment variables in your backend project:
+
+```env
+SECRET_KEY=your-django-secret-key
+DEBUG=False
+ALLOWED_HOSTS=your-backend.vercel.app,.vercel.app
+VERCEL=1
+
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_KEY=your-anon-key
+
+GEMINI_API_KEY=your-gemini-api-key
+
+JWT_SECRET=your-jwt-secret-key
+JWT_EXPIRATION_HOURS=24
+```
+
+**Note:** The `VERCEL=1` variable enables `/tmp/uploads` storage for file uploads in serverless environment.
+
+### Frontend Environment Variables (Vercel Dashboard)
+
+```env
+VITE_API_URL=https://your-backend.vercel.app
+```
 
 ## User Guide
 
@@ -486,3 +518,9 @@ All API responses follow this structure:
 5. **File upload fails**
    - Max file size is 10MB
    - Only PDF, DOC, DOCX, TXT are supported
+   - In Vercel: Ensure `VERCEL=1` environment variable is set
+
+6. **Vercel deployment issues**
+   - Set `VERCEL=1` in backend environment variables
+   - Resume downloads may fail after function restart (temporary storage)
+   - Check Vercel function logs for detailed error messages
