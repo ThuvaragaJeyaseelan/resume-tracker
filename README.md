@@ -398,17 +398,17 @@ npm run dev
 
 ### Job Relevancy Score (0-100)
 
-*For quick reference during applicant review*
+_For quick reference during applicant review_
 
 The AI doesn't just parse resumes - it **understands context and relevance to the specific job**.
 
-| Score  | Rating          | What It Means                                                                | Recruiter Action                      |
-| ------ | --------------- | ---------------------------------------------------------------------------- | ------------------------------------- |
-| 90-100 | Excellent Match | Has most required skills, relevant experience, strong background             | **Interview immediately**             |
-| 70-89  | Good Match      | Many required skills, minor gaps fillable, solid potential                   | **Review in detail**                  |
-| 50-69  | Partial Match   | Some relevant skills, significant gaps, may need training                    | **Consider for junior roles**         |
-| 30-49  | Weak Match      | Limited relevant experience, major skill mismatches                          | **Likely reject**                     |
-| 0-29   | Poor Match      | Background doesn't align with requirements, wrong career path                | **Auto-reject or quick skim**         |
+| Score  | Rating          | What It Means                                                    | Recruiter Action              |
+| ------ | --------------- | ---------------------------------------------------------------- | ----------------------------- |
+| 90-100 | Excellent Match | Has most required skills, relevant experience, strong background | **Interview immediately**     |
+| 70-89  | Good Match      | Many required skills, minor gaps fillable, solid potential       | **Review in detail**          |
+| 50-69  | Partial Match   | Some relevant skills, significant gaps, may need training        | **Consider for junior roles** |
+| 30-49  | Weak Match      | Limited relevant experience, major skill mismatches              | **Likely reject**             |
+| 0-29   | Poor Match      | Background doesn't align with requirements, wrong career path    | **Auto-reject or quick skim** |
 
 ### What the AI Evaluates
 
@@ -427,7 +427,7 @@ Score: 92/100 (Excellent Match)
 ✅ Skill Matches: Python, Django, React, TypeScript, PostgreSQL, AWS
 ❌ Skill Gaps: Kubernetes (minor)
 
-Summary: "Strong full-stack engineer with 5 years experience in similar tech stack. 
+Summary: "Strong full-stack engineer with 5 years experience in similar tech stack.
 Led team of 4 developers. Built scalable e-commerce platforms handling 100K+ daily users."
 
 Recruiter sees this in 5 seconds instead of reading 3-page resume.
