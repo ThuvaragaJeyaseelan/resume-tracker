@@ -139,13 +139,11 @@ The AI system addresses the fundamental recruiter challenge: **screening hundred
 
 ## Known Limitations
 
-- **File storage**: Resumes stored locally on backend server. Won't persist on Vercel serverless (needs cloud storage).
 - **Rate limits**: Gemini API has rate limits. Bulk resume analysis may fail with too many concurrent uploads.
 - **No real-time updates**: Dashboard doesn't auto-refresh when new applicants arrive. Requires manual refresh.
 - **Single recruiter context**: No multi-tenancy isolation beyond recruiter_id foreign keys.
 - **Resume parsing accuracy**: AI may misinterpret non-standard resume formats or creative designs.
 - **No resume preview**: Recruiters must download to view. In-browser PDF viewer would improve UX.
-- **Static file serving**: Django collectstatic not configured for Vercel. Static files served differently in production.
 
 ## Architecture
 
@@ -202,6 +200,7 @@ The AI system addresses the fundamental recruiter challenge: **screening hundred
 | **Frontend** | React 19, TypeScript, Vite, Tailwind CSS |
 | **Backend**  | Django 5, Django REST Framework          |
 | **Database** | Supabase (PostgreSQL)                    |
+| **Storage**  | Supabase Storage (Cloud file storage)    |
 | **AI**       | Google Gemini 2.0 Flash                  |
 | **Auth**     | JWT tokens, bcrypt password hashing      |
 
@@ -258,7 +257,15 @@ applicants
    - Project URL (e.g., `https://xxx.supabase.co`)
    - Anon/Public Key
 
-### 2. Backend Setup
+### 2. Set Up Supabase Storage
+
+1. In your Supabase dashboard, navigate to **Storage**
+2. Click **New bucket**
+3. Name it: `resumes`
+4. Make it **PUBLIC** (for generating signed download URLs)
+5. Click **Create bucket**
+
+### 3. Backend Setup
 
 ```bash
 cd backend
@@ -290,7 +297,7 @@ JWT_SECRET=your-jwt-secret-key
 JWT_EXPIRATION_HOURS=24
 ```
 
-### 3. Frontend Setup
+### 4. Frontend Setup
 
 ```bash
 cd frontend

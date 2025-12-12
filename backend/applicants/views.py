@@ -4,8 +4,9 @@ API views for applicant management.
 
 import os
 import uuid
+import tempfile
 from django.conf import settings
-from django.http import FileResponse, Http404
+from django.http import FileResponse, Http404, HttpResponseRedirect
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
@@ -16,6 +17,7 @@ from core.responses import (
     create_not_found_response,
     create_server_error_response,
 )
+from core.supabase import upload_file_to_storage, get_file_download_url
 from . import services
 from .models import ApplicantCreateInput, ApplicantUpdateInput
 from .ai_service import analyze_resume_from_file, analyze_resume_file_for_job
@@ -67,23 +69,29 @@ class ApplicantUploadView(APIView):
             # Generate unique filename
             ext = os.path.splitext(uploaded_file.name)[1]
             unique_filename = f"{uuid.uuid4()}{ext}"
-            file_path = os.path.join(settings.UPLOAD_DIR, unique_filename)
             
-            # Save file to disk
-            with open(file_path, 'wb') as f:
-                for chunk in uploaded_file.chunks():
-                    f.write(chunk)
-            
+            # Save file temporarily for AI analysis
+            temp_file_path = None
             try:
-                # Analyze resume with AI
-                analysis = analyze_resume_from_file(file_path)
+                # Create temporary file for AI processing
+                with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as temp_file:
+                    for chunk in uploaded_file.chunks():
+                        temp_file.write(chunk)
+                    temp_file_path = temp_file.name
                 
-                # Create applicant record
+                # Analyze resume with AI (from temporary file)
+                analysis = analyze_resume_from_file(temp_file_path)
+                
+                # Upload file to Supabase Storage
+                with open(temp_file_path, 'rb') as f:
+                    storage_url = upload_file_to_storage(f, unique_filename)
+                
+                # Create applicant record with storage URL
                 input_data = ApplicantCreateInput(
                     name=analysis['name'],
                     email=analysis['email'],
                     phone=analysis.get('phone'),
-                    resume_file_path=file_path,
+                    resume_file_path=storage_url,  # Store Supabase URL
                     priority_score=analysis['priority_score'],
                     summary=analysis['summary'],
                     key_skills=analysis['key_skills'],
@@ -102,11 +110,10 @@ class ApplicantUploadView(APIView):
                     status_code=status.HTTP_201_CREATED
                 )
                 
-            except Exception as e:
-                # Clean up file if analysis/creation fails
-                if os.path.exists(file_path):
-                    os.remove(file_path)
-                raise e
+            finally:
+                # Clean up temporary file
+                if temp_file_path and os.path.exists(temp_file_path):
+                    os.remove(temp_file_path)
                 
         except Exception as e:
             print(f"Error uploading resume: {e}")
@@ -196,31 +203,37 @@ class JobApplicationView(APIView):
             # Generate unique filename
             ext = os.path.splitext(uploaded_file.name)[1]
             unique_filename = f"{uuid.uuid4()}{ext}"
-            file_path = os.path.join(settings.UPLOAD_DIR, unique_filename)
             
-            # Save file to disk
-            with open(file_path, 'wb') as f:
-                for chunk in uploaded_file.chunks():
-                    f.write(chunk)
-            
+            # Save file temporarily for AI analysis
+            temp_file_path = None
             try:
+                # Create temporary file for AI processing
+                with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as temp_file:
+                    for chunk in uploaded_file.chunks():
+                        temp_file.write(chunk)
+                    temp_file_path = temp_file.name
+                
                 # Perform general resume analysis
-                general_analysis = analyze_resume_from_file(file_path)
+                general_analysis = analyze_resume_from_file(temp_file_path)
                 
                 # Perform job-specific analysis
                 job_analysis = analyze_resume_file_for_job(
-                    file_path,
+                    temp_file_path,
                     job_title=job.get('title', ''),
                     job_requirements=job.get('requirements', ''),
                     job_description=job.get('description', '')
                 )
                 
-                # Create applicant record
+                # Upload file to Supabase Storage
+                with open(temp_file_path, 'rb') as f:
+                    storage_url = upload_file_to_storage(f, unique_filename)
+                
+                # Create applicant record with storage URL
                 input_data = ApplicantCreateInput(
                     name=name,
                     email=email,
                     phone=phone,
-                    resume_file_path=file_path,
+                    resume_file_path=storage_url,  # Store Supabase URL
                     # General analysis
                     priority_score=general_analysis['priority_score'],
                     summary=general_analysis['summary'],
@@ -249,11 +262,10 @@ class JobApplicationView(APIView):
                     status_code=status.HTTP_201_CREATED
                 )
                 
-            except Exception as e:
-                # Clean up file if analysis/creation fails
-                if os.path.exists(file_path):
-                    os.remove(file_path)
-                raise e
+            finally:
+                # Clean up temporary file
+                if temp_file_path and os.path.exists(temp_file_path):
+                    os.remove(temp_file_path)
                 
         except Exception as e:
             print(f"Error submitting application: {e}")
@@ -520,23 +532,31 @@ class ApplicantResumeDownloadView(APIView):
                     request
                 )
             
-            file_path = applicant.get('resumeFilePath')
+            storage_url = applicant.get('resumeFilePath')
             
-            if not file_path or not os.path.exists(file_path):
+            if not storage_url:
                 return create_not_found_response(
                     "Resume file not found",
                     request
                 )
             
-            # Return file as download
-            filename = os.path.basename(file_path)
-            response = FileResponse(
-                open(file_path, 'rb'),
-                as_attachment=True,
-                filename=filename
-            )
+            # Extract filename from storage URL
+            # URL format: https://xxx.supabase.co/storage/v1/object/public/resumes/filename.pdf
+            filename = storage_url.split('/')[-1]
             
-            return response
+            # Generate signed download URL (1 hour expiry)
+            try:
+                signed_url = get_file_download_url(filename, expires_in=3600)
+                
+                # Redirect to signed URL for download
+                return HttpResponseRedirect(signed_url['signedURL'])
+                
+            except Exception as download_error:
+                print(f"Error generating download URL: {download_error}")
+                return create_server_error_response(
+                    "Failed to generate download link",
+                    request
+                )
             
         except Exception as e:
             print(f"Error downloading resume: {e}")
