@@ -4,20 +4,22 @@ AI-powered Applicant Tracking System with recruiter authentication, job posting 
 
 ![Tech Stack](https://img.shields.io/badge/Frontend-React%20+%20TypeScript%20+%20Tailwind-61DAFB?logo=react)
 ![Backend](https://img.shields.io/badge/Backend-Django%20+%20DRF-092E20?logo=django)
-![Database](https://img.shields.io/badge/Database-Supabase%20(PostgreSQL)-3ECF8E?logo=supabase)
+![Database](<https://img.shields.io/badge/Database-Supabase%20(PostgreSQL)-3ECF8E?logo=supabase>)
 ![AI](https://img.shields.io/badge/AI-Google%20Gemini%202.0-4285F4?logo=google)
 
 ## Live Demo
 
 🚀 **[https://resume-tracker-mu.vercel.app/](https://resume-tracker-mu.vercel.app/)**
 
-**Test Credentials:**
+**Test Credentials for Recruiters:**
+
 - Email: `john99@gmail.com`
 - Password: `john#932`
 
 ## Features
 
 ### For Recruiters
+
 - **Authentication**: Secure email/password signup and login with JWT tokens
 - **Job Management**: Create, edit, and manage job postings with draft/active/closed status
 - **AI-Powered Matching**: View candidates ranked by job-specific relevancy score
@@ -26,11 +28,13 @@ AI-powered Applicant Tracking System with recruiter authentication, job posting 
 - **Resume Downloads**: Download original resume files
 
 ### For Candidates
+
 - **Public Job Board**: Browse active job listings with search and filters
 - **Easy Application**: Apply to jobs with resume upload (no account needed)
 - **AI Analysis**: Automatic skill matching against job requirements
 
 ### AI Features
+
 - **Resume Analysis**: Extract skills, experience, education, and contact info
 - **Job Matching**: Score candidates (0-100) based on job requirements
 - **Match Insights**: Identify matching skills and skill gaps
@@ -39,6 +43,7 @@ AI-powered Applicant Tracking System with recruiter authentication, job posting 
 ## Design Decisions
 
 ### Technology Choices
+
 - **Django**: Chosen for rapid development, excellent ORM abstraction, and strong ecosystem. Preferred over Golang/Rust for faster prototyping within assignment timeframe.
 - **React + TypeScript**: Type safety reduces bugs, React's component model scales well. TypeScript catches errors at compile time.
 - **Supabase**: Managed PostgreSQL with instant APIs, reduces infrastructure overhead. Real-time capabilities for future features.
@@ -46,26 +51,28 @@ AI-powered Applicant Tracking System with recruiter authentication, job posting 
 - **Vercel**: Zero-config deployment, serverless functions, automatic HTTPS. Fast iteration cycles.
 
 ### Architecture Decisions
+
 - **No candidate authentication**: Reduces friction in application process. Email-based tracking is sufficient.
 - **JWT tokens**: Stateless auth, scales horizontally, no session management needed.
 - **Modular Django apps**: Separation of concerns (auth/jobs/applicants/core) enables independent testing and future scaling.
 - **AI-first scoring**: Addresses core problem - sorting hundreds of applicants. Manual review would bottleneck recruiters.
 
 ### UX Priorities
+
 - **AI scoring front and center**: Recruiters see relevancy scores immediately, not buried in details.
 - **Public job board**: Candidates browse without signup, mimicking real job boards.
 - **Status pipeline**: Visual tracking of candidates through hiring stages.
 
 ## Assumptions
 
-- **Scale**: Designed for hundreds of applications per job, not thousands (Gemini rate limits)
+- **Scale**: Designed for hundreds of applications per job
 - **Resume format**: Candidates submit standard formats (PDF/DOC). No LinkedIn imports or profile builders.
-- **Security**: JWT auth sufficient for MVP. OAuth/2FA not needed initially.
+- **Security**: JWT auth sufficient for MVP.
 - **Storage**: Local file storage for development. Production would use Supabase Storage or S3.
-- **Workflow**: Recruiters work solo, no team collaboration features (comments, assignments).
+- **Workflow**: Recruiters can login, post job listings, receive candidates, assess candidates
 - **Compliance**: GDPR/data retention not implemented (would need in production).
 - **Interview scheduling**: Out of scope. Recruiters contact candidates externally.
-- **Notifications**: Email notifications not included (would add SendGrid/Postmark).
+- **Notifications**: Email notifications not included
 
 ## AI Tools Used
 
@@ -77,6 +84,7 @@ AI-powered Applicant Tracking System with recruiter authentication, job posting 
 ### Why These Features?
 
 **High Priority (Implemented):**
+
 - ✅ AI-powered candidate scoring - Core value proposition for sorting hundreds of applicants
 - ✅ Job posting CRUD - Basic requirement for any ATS
 - ✅ Public job board - Enables candidate applications
@@ -84,11 +92,13 @@ AI-powered Applicant Tracking System with recruiter authentication, job posting 
 - ✅ Status tracking - Essential for managing hiring pipeline
 
 **Medium Priority (Deferred):**
+
 - ⏳ Email notifications - Adds complexity, can be done manually initially
 - ⏳ Advanced filters - Basic search is sufficient for MVP
 - ⏳ Team collaboration - Solo recruiter workflow is simpler
 
 **Low Priority (Out of Scope):**
+
 - ❌ Interview scheduling - Integrate Calendly/external tools
 - ❌ Offer management - Too complex for timeframe
 - ❌ Analytics dashboard - Nice-to-have, not essential
@@ -166,13 +176,13 @@ AI-powered Applicant Tracking System with recruiter authentication, job posting 
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|------------|
+| Layer        | Technology                               |
+| ------------ | ---------------------------------------- |
 | **Frontend** | React 19, TypeScript, Vite, Tailwind CSS |
-| **Backend** | Django 5, Django REST Framework |
-| **Database** | Supabase (PostgreSQL) |
-| **AI** | Google Gemini 2.0 Flash |
-| **Auth** | JWT tokens, bcrypt password hashing |
+| **Backend**  | Django 5, Django REST Framework          |
+| **Database** | Supabase (PostgreSQL)                    |
+| **AI**       | Google Gemini 2.0 Flash                  |
+| **Auth**     | JWT tokens, bcrypt password hashing      |
 
 ## Database Schema
 
@@ -244,6 +254,7 @@ cp env.example .env
 ```
 
 Edit `.env` with your credentials:
+
 ```env
 SECRET_KEY=your-django-secret-key
 DEBUG=True
@@ -270,6 +281,7 @@ npm install
 ### Running the Application
 
 **Terminal 1 - Backend:**
+
 ```bash
 cd backend
 source venv/bin/activate
@@ -277,12 +289,14 @@ python manage.py runserver 8000
 ```
 
 **Terminal 2 - Frontend:**
+
 ```bash
 cd frontend
 npm run dev
 ```
 
 **Access the app:**
+
 - Frontend: http://localhost:5173
 - Backend API: http://localhost:8000
 
@@ -312,53 +326,58 @@ npm run dev
 ## API Endpoints
 
 ### Authentication
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/auth/signup` | Create recruiter account |
-| `POST` | `/api/auth/login` | Authenticate recruiter |
-| `GET` | `/api/auth/profile` | Get current profile (auth required) |
-| `PATCH` | `/api/auth/profile` | Update profile (auth required) |
-| `POST` | `/api/auth/refresh` | Refresh JWT token |
+
+| Method  | Endpoint            | Description                         |
+| ------- | ------------------- | ----------------------------------- |
+| `POST`  | `/api/auth/signup`  | Create recruiter account            |
+| `POST`  | `/api/auth/login`   | Authenticate recruiter              |
+| `GET`   | `/api/auth/profile` | Get current profile (auth required) |
+| `PATCH` | `/api/auth/profile` | Update profile (auth required)      |
+| `POST`  | `/api/auth/refresh` | Refresh JWT token                   |
 
 ### Jobs (Authenticated)
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/jobs/` | List recruiter's jobs |
-| `POST` | `/api/jobs/` | Create new job |
-| `GET` | `/api/jobs/{id}/` | Get job details |
-| `PATCH` | `/api/jobs/{id}/` | Update job |
-| `DELETE` | `/api/jobs/{id}/` | Delete job |
-| `GET` | `/api/jobs/{id}/applicants/` | List job applicants |
-| `GET` | `/api/jobs/stats/` | Get job statistics |
+
+| Method   | Endpoint                     | Description           |
+| -------- | ---------------------------- | --------------------- |
+| `GET`    | `/api/jobs/`                 | List recruiter's jobs |
+| `POST`   | `/api/jobs/`                 | Create new job        |
+| `GET`    | `/api/jobs/{id}/`            | Get job details       |
+| `PATCH`  | `/api/jobs/{id}/`            | Update job            |
+| `DELETE` | `/api/jobs/{id}/`            | Delete job            |
+| `GET`    | `/api/jobs/{id}/applicants/` | List job applicants   |
+| `GET`    | `/api/jobs/stats/`           | Get job statistics    |
 
 ### Jobs (Public)
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/jobs/public/` | List active jobs |
-| `GET` | `/api/jobs/public/{id}/` | Get job details |
-| `GET` | `/api/jobs/filters/` | Get filter options |
-| `POST` | `/api/jobs/{id}/apply/` | Submit application |
+
+| Method | Endpoint                 | Description        |
+| ------ | ------------------------ | ------------------ |
+| `GET`  | `/api/jobs/public/`      | List active jobs   |
+| `GET`  | `/api/jobs/public/{id}/` | Get job details    |
+| `GET`  | `/api/jobs/filters/`     | Get filter options |
+| `POST` | `/api/jobs/{id}/apply/`  | Submit application |
 
 ### Applicants (Authenticated)
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/applicants/` | List all applicants |
-| `GET` | `/api/applicants/{id}/` | Get applicant details |
-| `PATCH` | `/api/applicants/{id}/` | Update status/notes |
-| `DELETE` | `/api/applicants/{id}/` | Delete applicant |
-| `GET` | `/api/applicants/{id}/resume/` | Download resume |
-| `GET` | `/api/applicants/stats/` | Get statistics |
+
+| Method   | Endpoint                       | Description           |
+| -------- | ------------------------------ | --------------------- |
+| `GET`    | `/api/applicants/`             | List all applicants   |
+| `GET`    | `/api/applicants/{id}/`        | Get applicant details |
+| `PATCH`  | `/api/applicants/{id}/`        | Update status/notes   |
+| `DELETE` | `/api/applicants/{id}/`        | Delete applicant      |
+| `GET`    | `/api/applicants/{id}/resume/` | Download resume       |
+| `GET`    | `/api/applicants/stats/`       | Get statistics        |
 
 ## Scoring Guidelines
 
 ### Job Relevancy Score (0-100)
-| Score | Rating | Meaning |
-|-------|--------|---------|
+
+| Score  | Rating          | Meaning                                       |
+| ------ | --------------- | --------------------------------------------- |
 | 90-100 | Excellent Match | Has most required skills, relevant experience |
-| 70-89 | Good Match | Many required skills, some gaps fillable |
-| 50-69 | Partial Match | Some relevant skills, significant gaps |
-| 30-49 | Weak Match | Limited relevant experience |
-| 0-29 | Poor Match | Background doesn't align with requirements |
+| 70-89  | Good Match      | Many required skills, some gaps fillable      |
+| 50-69  | Partial Match   | Some relevant skills, significant gaps        |
+| 30-49  | Weak Match      | Limited relevant experience                   |
+| 0-29   | Poor Match      | Background doesn't align with requirements    |
 
 ## Response Format
 
@@ -382,24 +401,24 @@ All API responses follow this structure:
 ### Common Issues
 
 1. **"Supabase credentials not configured"**
+
    - Ensure `.env` file exists with `SUPABASE_URL` and `SUPABASE_KEY`
 
 2. **"Failed to analyze resume"**
+
    - Check your `GEMINI_API_KEY` is valid
    - Ensure the file is not corrupted
 
 3. **CORS errors in browser**
+
    - Backend must be running on port 8000
    - Frontend must be running on port 5173
 
 4. **"Authentication required"**
+
    - Token may have expired (24h default)
    - Login again to get a new token
 
 5. **File upload fails**
    - Max file size is 10MB
    - Only PDF, DOC, DOCX, TXT are supported
-
-## License
-
-ISC
