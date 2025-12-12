@@ -1,6 +1,8 @@
 # ATS Resume Tracker
 
-AI-powered Applicant Tracking System with recruiter authentication, job posting management, public job board, and AI-powered candidate matching.
+**AI-powered Applicant Tracking System that solves the recruiter's biggest problem: sorting through hundreds of resumes efficiently.**
+
+Built for recruiters who need to quickly identify top candidates from large applicant pools. Uses Google Gemini 2.0 AI to automatically analyze resumes, extract key information, and rank candidates by job relevancy - turning hours of manual screening into seconds.
 
 ![Tech Stack](https://img.shields.io/badge/Frontend-React%20+%20TypeScript%20+%20Tailwind-61DAFB?logo=react)
 ![Backend](https://img.shields.io/badge/Backend-Django%20+%20DRF-092E20?logo=django)
@@ -18,27 +20,42 @@ AI-powered Applicant Tracking System with recruiter authentication, job posting 
 
 ## Features
 
-### For Recruiters
+## 🤖 AI-Powered Features (Core Value Proposition)
+
+The AI system addresses the fundamental recruiter challenge: **screening hundreds of applications takes too long**. Traditional manual review of 200 resumes can take 10+ hours. This system does it in minutes.
+
+### Automated Resume Analysis
+
+- **Instant Parsing**: AI extracts contact info, skills, experience, and education from any resume format
+- **Zero Manual Data Entry**: Candidates upload resume once, AI handles all data extraction
+- **Structured Output**: Raw resume text transformed into searchable, filterable database records
+
+### Intelligent Job Matching
+
+- **Relevancy Scoring (0-100)**: Every applicant gets a job-specific score based on requirements
+- **Skill Gap Analysis**: AI identifies which required skills the candidate has vs. missing
+- **Match Insights**: Natural language explanation of why a candidate is a good/poor fit
+- **Smart Ranking**: Applicants automatically sorted by relevancy score (best candidates first)
+
+### Time-Saving Impact
+
+- **Before AI**: Recruiter manually reads 200 resumes × 3 min each = **10 hours**
+- **With AI**: Review pre-scored candidates, focus only on top 20% = **2 hours**
+- **Result**: **80% time reduction** on initial screening
+
+### Other Recruiter Features
 
 - **Authentication**: Secure email/password signup and login with JWT tokens
 - **Job Management**: Create, edit, and manage job postings with draft/active/closed status
-- **AI-Powered Matching**: View candidates ranked by job-specific relevancy score
 - **Dashboard**: Overview of jobs, applicants, and hiring pipeline
-- **Applicant Management**: Review, shortlist, reject, or hire candidates
-- **Resume Downloads**: Download original resume files
+- **Status Tracking**: Move candidates through pipeline (new → reviewed → shortlisted → rejected/hired)
+- **Resume Downloads**: Access original resume files
 
 ### For Candidates
 
 - **Public Job Board**: Browse active job listings with search and filters
 - **Easy Application**: Apply to jobs with resume upload (no account needed)
-- **AI Analysis**: Automatic skill matching against job requirements
-
-### AI Features
-
-- **Resume Analysis**: Extract skills, experience, education, and contact info
-- **Job Matching**: Score candidates (0-100) based on job requirements
-- **Match Insights**: Identify matching skills and skill gaps
-- **Smart Prioritization**: Rank applicants by relevancy
+- **No Account Required**: Frictionless application process
 
 ## Design Decisions
 
@@ -52,10 +69,13 @@ AI-powered Applicant Tracking System with recruiter authentication, job posting 
 
 ### Architecture Decisions
 
+- **AI-First Design**: The entire system is built around solving "too many applicants, too little time"
+  - Resume upload → Immediate AI analysis (not deferred)
+  - Default sorting: AI relevancy score (not date applied)
+  - Applicant list shows scores prominently (not buried in details)
 - **No candidate authentication**: Reduces friction in application process. Email-based tracking is sufficient.
 - **JWT tokens**: Stateless auth, scales horizontally, no session management needed.
 - **Modular Django apps**: Separation of concerns (auth/jobs/applicants/core) enables independent testing and future scaling.
-- **AI-first scoring**: Addresses core problem - sorting hundreds of applicants. Manual review would bottleneck recruiters.
 
 ### UX Priorities
 
@@ -85,10 +105,11 @@ AI-powered Applicant Tracking System with recruiter authentication, job posting 
 
 **High Priority (Implemented):**
 
-- ✅ AI-powered candidate scoring - Core value proposition for sorting hundreds of applicants
+- ✅ **AI-powered candidate scoring** - THE core feature. Without this, recruiters drown in manual screening
+- ✅ **Automatic resume parsing** - Eliminates data entry bottleneck
+- ✅ **Job-specific matching** - Generic scores aren't useful; must be tailored to each role
 - ✅ Job posting CRUD - Basic requirement for any ATS
 - ✅ Public job board - Enables candidate applications
-- ✅ Resume upload & parsing - Automates data entry
 - ✅ Status tracking - Essential for managing hiring pipeline
 
 **Medium Priority (Deferred):**
@@ -367,9 +388,52 @@ npm run dev
 | `GET`    | `/api/applicants/{id}/resume/` | Download resume       |
 | `GET`    | `/api/applicants/stats/`       | Get statistics        |
 
-## Scoring Guidelines
+## AI Scoring System
+
+### How It Solves the Recruiter's Problem
+
+**The Problem**: A recruiter posts a Software Engineer role requiring Python, React, and 3+ years experience. They receive 200 applications. Reading each resume for 3 minutes = **10 hours of manual work**.
+
+**The Solution**: AI analyzes all 200 resumes in parallel, scoring each against the job requirements. Recruiter reviews only the top-scored 40 candidates (20%) = **2 hours of focused work**.
 
 ### Job Relevancy Score (0-100)
+
+*For quick reference during applicant review*
+
+The AI doesn't just parse resumes - it **understands context and relevance to the specific job**.
+
+| Score  | Rating          | What It Means                                                                | Recruiter Action                      |
+| ------ | --------------- | ---------------------------------------------------------------------------- | ------------------------------------- |
+| 90-100 | Excellent Match | Has most required skills, relevant experience, strong background             | **Interview immediately**             |
+| 70-89  | Good Match      | Many required skills, minor gaps fillable, solid potential                   | **Review in detail**                  |
+| 50-69  | Partial Match   | Some relevant skills, significant gaps, may need training                    | **Consider for junior roles**         |
+| 30-49  | Weak Match      | Limited relevant experience, major skill mismatches                          | **Likely reject**                     |
+| 0-29   | Poor Match      | Background doesn't align with requirements, wrong career path                | **Auto-reject or quick skim**         |
+
+### What the AI Evaluates
+
+1. **Skill Matching**: Does the candidate have Python, React, AWS? (explicit matches)
+2. **Experience Level**: 5 years experience > 1 year when job requires 3+
+3. **Domain Knowledge**: E-commerce background for e-commerce role (contextual understanding)
+4. **Education Relevance**: CS degree for technical roles, MBA for business roles
+5. **Career Trajectory**: Promotions, leadership, consistent growth patterns
+
+### Real Example Output
+
+```
+Candidate: Sarah Chen
+Score: 92/100 (Excellent Match)
+
+✅ Skill Matches: Python, Django, React, TypeScript, PostgreSQL, AWS
+❌ Skill Gaps: Kubernetes (minor)
+
+Summary: "Strong full-stack engineer with 5 years experience in similar tech stack. 
+Led team of 4 developers. Built scalable e-commerce platforms handling 100K+ daily users."
+
+Recruiter sees this in 5 seconds instead of reading 3-page resume.
+```
+
+## Scoring Guidelines
 
 | Score  | Rating          | Meaning                                       |
 | ------ | --------------- | --------------------------------------------- |
