@@ -63,16 +63,19 @@ def upload_file_to_storage(file_obj: BinaryIO, filename: str, bucket_name: str =
     try:
         supabase = get_supabase_client()
 
+        # Read file content
+        file_content = file_obj.read()
+        
         # Upload file to storage
         response = supabase.storage.from_(bucket_name).upload(
             path=filename,
-            file=file_obj,
+            file=file_content,
             file_options={"content-type": "application/octet-stream"}
         )
 
-        if response.status_code not in [200, 201]:
-            raise Exception(f"Upload failed with status {response.status_code}")
-
+        # The response is a StorageFileAPI response object
+        # If it doesn't raise an exception, the upload succeeded
+        
         # Get public URL
         public_url = supabase.storage.from_(bucket_name).get_public_url(filename)
 
@@ -130,7 +133,8 @@ def delete_file_from_storage(filename: str, bucket_name: str = 'resumes') -> boo
 
         response = supabase.storage.from_(bucket_name).remove([filename])
 
-        return response.status_code in [200, 204]
+        # If no exception was raised, deletion succeeded
+        return True
 
     except Exception as e:
         print(f"Error deleting file from storage: {e}")
