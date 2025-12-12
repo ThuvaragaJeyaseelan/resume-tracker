@@ -34,6 +34,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.security.SecurityMiddleware',
     'django.middleware.common.CommonMiddleware',
     'core.middleware.RequestIDMiddleware',
     'auth.middleware.JWTAuthenticationMiddleware',
@@ -109,6 +110,10 @@ ALLOWED_UPLOAD_TYPES = [
     'text/plain',
 ]
 
+# Create uploads directory if it doesn't exist (skip in serverless)
+if not os.getenv('VERCEL'):
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+
 # Supabase Configuration
 SUPABASE_URL = os.getenv('SUPABASE_URL', '')
 SUPABASE_KEY = os.getenv('SUPABASE_KEY', '')
@@ -119,7 +124,3 @@ GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '')
 # JWT Configuration
 JWT_SECRET = os.getenv('JWT_SECRET', SECRET_KEY)
 JWT_EXPIRATION_HOURS = int(os.getenv('JWT_EXPIRATION_HOURS', 24))
-
-# Create uploads directory if it doesn't exist
-os.makedirs(UPLOAD_DIR, exist_ok=True)
-
