@@ -41,7 +41,7 @@ The AI system addresses the fundamental recruiter challenge: **screening hundred
 
 - **Before AI**: Recruiter manually reads 200 resumes × 3 min each = **10 hours**
 - **With AI**: Review pre-scored candidates, focus only on top 20% = **2 hours**
-- **Result**: **80% time reduction** on initial screening
+- **Result**: **95% time reduction** on initial screening
 
 ### Other Recruiter Features
 
