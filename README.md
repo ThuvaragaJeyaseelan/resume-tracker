@@ -1,32 +1,151 @@
 # ATS Resume Tracker
 
-AI-powered Applicant Tracking System with recruiter authentication, job posting management, public job board, and AI-powered candidate matching.
+**AI-powered Applicant Tracking System that solves the recruiter's biggest problem: sorting through hundreds of resumes efficiently.**
+
+Built for recruiters who need to quickly identify top candidates from large applicant pools. Uses Google Gemini 2.0 AI to automatically analyze resumes, extract key information, and rank candidates by job relevancy - turning hours of manual screening into seconds.
 
 ![Tech Stack](https://img.shields.io/badge/Frontend-React%20+%20TypeScript%20+%20Tailwind-61DAFB?logo=react)
 ![Backend](https://img.shields.io/badge/Backend-Django%20+%20DRF-092E20?logo=django)
-![Database](https://img.shields.io/badge/Database-Supabase%20(PostgreSQL)-3ECF8E?logo=supabase)
+![Database](<https://img.shields.io/badge/Database-Supabase%20(PostgreSQL)-3ECF8E?logo=supabase>)
 ![AI](https://img.shields.io/badge/AI-Google%20Gemini%202.0-4285F4?logo=google)
+
+## Live Demo
+
+🚀 **[https://resume-tracker-mu.vercel.app/](https://resume-tracker-mu.vercel.app/)**
+
+**Test Credentials for Recruiters:**
+
+- Email: `john99@gmail.com`
+- Password: `john#932`
 
 ## Features
 
-### For Recruiters
+## 🤖 AI-Powered Features (Core Value Proposition)
+
+The AI system addresses the fundamental recruiter challenge: **screening hundreds of applications takes too long**. Traditional manual review of 200 resumes can take 10+ hours. This system does it in minutes.
+
+### Automated Resume Analysis
+
+- **Instant Parsing**: AI extracts contact info, skills, experience, and education from any resume format
+- **Zero Manual Data Entry**: Candidates upload resume once, AI handles all data extraction
+- **Structured Output**: Raw resume text transformed into searchable, filterable database records
+
+### Intelligent Job Matching
+
+- **Relevancy Scoring (0-100)**: Every applicant gets a job-specific score based on requirements
+- **Skill Gap Analysis**: AI identifies which required skills the candidate has vs. missing
+- **Match Insights**: Natural language explanation of why a candidate is a good/poor fit
+- **Smart Ranking**: Applicants automatically sorted by relevancy score (best candidates first)
+
+### Time-Saving Impact
+
+- **Before AI**: Recruiter manually reads 200 resumes × 3 min each = **10 hours**
+- **With AI**: Review pre-scored candidates, focus only on top 20% = **2 hours**
+- **Result**: **80% time reduction** on initial screening
+
+### Other Recruiter Features
+
 - **Authentication**: Secure email/password signup and login with JWT tokens
 - **Job Management**: Create, edit, and manage job postings with draft/active/closed status
-- **AI-Powered Matching**: View candidates ranked by job-specific relevancy score
 - **Dashboard**: Overview of jobs, applicants, and hiring pipeline
-- **Applicant Management**: Review, shortlist, reject, or hire candidates
-- **Resume Downloads**: Download original resume files
+- **Status Tracking**: Move candidates through pipeline (new → reviewed → shortlisted → rejected/hired)
+- **Resume Downloads**: Access original resume files
 
 ### For Candidates
+
 - **Public Job Board**: Browse active job listings with search and filters
 - **Easy Application**: Apply to jobs with resume upload (no account needed)
-- **AI Analysis**: Automatic skill matching against job requirements
+- **No Account Required**: Frictionless application process
 
-### AI Features
-- **Resume Analysis**: Extract skills, experience, education, and contact info
-- **Job Matching**: Score candidates (0-100) based on job requirements
-- **Match Insights**: Identify matching skills and skill gaps
-- **Smart Prioritization**: Rank applicants by relevancy
+## Design Decisions
+
+### Technology Choices
+
+- **Django**: Chosen for rapid development, excellent ORM abstraction, and strong ecosystem. Preferred over Golang/Rust for faster prototyping within assignment timeframe.
+- **React + TypeScript**: Type safety reduces bugs, React's component model scales well. TypeScript catches errors at compile time.
+- **Supabase**: Managed PostgreSQL with instant APIs, reduces infrastructure overhead. Real-time capabilities for future features.
+- **Gemini 2.0 Flash**: Fast, cost-effective, excellent at structured resume parsing. Multimodal capabilities for future enhancements.
+- **Vercel**: Zero-config deployment, serverless functions, automatic HTTPS. Fast iteration cycles.
+
+### Architecture Decisions
+
+- **AI-First Design**: The entire system is built around solving "too many applicants, too little time"
+  - Resume upload → Immediate AI analysis (not deferred)
+  - Default sorting: AI relevancy score (not date applied)
+  - Applicant list shows scores prominently (not buried in details)
+- **No candidate authentication**: Reduces friction in application process. Email-based tracking is sufficient.
+- **JWT tokens**: Stateless auth, scales horizontally, no session management needed.
+- **Modular Django apps**: Separation of concerns (auth/jobs/applicants/core) enables independent testing and future scaling.
+
+### UX Priorities
+
+- **AI scoring front and center**: Recruiters see relevancy scores immediately, not buried in details.
+- **Public job board**: Candidates browse without signup, mimicking real job boards.
+- **Status pipeline**: Visual tracking of candidates through hiring stages.
+
+## Assumptions
+
+- **Scale**: Designed for hundreds of applications per job
+- **Resume format**: Candidates submit standard formats (PDF/DOC). No LinkedIn imports or profile builders.
+- **Security**: JWT auth sufficient for MVP.
+- **Storage**: Local file storage for development. Production would use Supabase Storage or S3.
+- **Workflow**: Recruiters can login, post job listings, receive candidates, assess candidates
+- **Compliance**: GDPR/data retention not implemented (would need in production).
+- **Interview scheduling**: Out of scope. Recruiters contact candidates externally.
+- **Notifications**: Email notifications not included
+
+## AI Tools Used
+
+- **Cursor AI**: Code generation, refactoring, debugging. Helped scaffold Django apps, React components, and API endpoints.
+- **ChatGPT**: Architecture decisions, debugging complex issues, optimizing AI prompts for resume parsing.
+
+## Feature Prioritization
+
+### Why These Features?
+
+**High Priority (Implemented):**
+
+- ✅ **AI-powered candidate scoring** - THE core feature. Without this, recruiters drown in manual screening
+- ✅ **Automatic resume parsing** - Eliminates data entry bottleneck
+- ✅ **Job-specific matching** - Generic scores aren't useful; must be tailored to each role
+- ✅ Job posting CRUD - Basic requirement for any ATS
+- ✅ Public job board - Enables candidate applications
+- ✅ Status tracking - Essential for managing hiring pipeline
+
+**Medium Priority (Deferred):**
+
+- ⏳ Email notifications - Adds complexity, can be done manually initially
+- ⏳ Advanced filters - Basic search is sufficient for MVP
+- ⏳ Team collaboration - Solo recruiter workflow is simpler
+
+**Low Priority (Out of Scope):**
+
+- ❌ Interview scheduling - Integrate Calendly/external tools
+- ❌ Offer management - Too complex for timeframe
+- ❌ Analytics dashboard - Nice-to-have, not essential
+
+### With More Time, I Would Add:
+
+1. **Email notifications** - Automated updates to candidates and recruiters
+2. **Bulk actions** - Reject/shortlist multiple candidates at once
+3. **Resume storage in cloud** - Supabase Storage integration instead of local files
+4. **Advanced search** - Filter by skills, experience years, location
+5. **Team features** - Share notes, assign reviewers, collaborative hiring
+6. **Interview scheduling** - Calendar integration for booking interviews
+7. **Analytics dashboard** - Hiring funnel metrics, time-to-hire, source tracking
+8. **Export functionality** - Download applicant lists as CSV/Excel
+9. **Custom job application forms** - Per-job screening questions
+10. **Mobile responsiveness** - Optimize UI for mobile recruiters
+
+## Known Limitations
+
+- **File storage**: Resumes stored locally on backend server. Won't persist on Vercel serverless (needs cloud storage).
+- **Rate limits**: Gemini API has rate limits. Bulk resume analysis may fail with too many concurrent uploads.
+- **No real-time updates**: Dashboard doesn't auto-refresh when new applicants arrive. Requires manual refresh.
+- **Single recruiter context**: No multi-tenancy isolation beyond recruiter_id foreign keys.
+- **Resume parsing accuracy**: AI may misinterpret non-standard resume formats or creative designs.
+- **No resume preview**: Recruiters must download to view. In-browser PDF viewer would improve UX.
+- **Static file serving**: Django collectstatic not configured for Vercel. Static files served differently in production.
 
 ## Architecture
 
@@ -78,13 +197,13 @@ AI-powered Applicant Tracking System with recruiter authentication, job posting 
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|------------|
+| Layer        | Technology                               |
+| ------------ | ---------------------------------------- |
 | **Frontend** | React 19, TypeScript, Vite, Tailwind CSS |
-| **Backend** | Django 5, Django REST Framework |
-| **Database** | Supabase (PostgreSQL) |
-| **AI** | Google Gemini 2.0 Flash |
-| **Auth** | JWT tokens, bcrypt password hashing |
+| **Backend**  | Django 5, Django REST Framework          |
+| **Database** | Supabase (PostgreSQL)                    |
+| **AI**       | Google Gemini 2.0 Flash                  |
+| **Auth**     | JWT tokens, bcrypt password hashing      |
 
 ## Database Schema
 
@@ -156,6 +275,7 @@ cp env.example .env
 ```
 
 Edit `.env` with your credentials:
+
 ```env
 SECRET_KEY=your-django-secret-key
 DEBUG=True
@@ -182,6 +302,7 @@ npm install
 ### Running the Application
 
 **Terminal 1 - Backend:**
+
 ```bash
 cd backend
 source venv/bin/activate
@@ -189,12 +310,14 @@ python manage.py runserver 8000
 ```
 
 **Terminal 2 - Frontend:**
+
 ```bash
 cd frontend
 npm run dev
 ```
 
 **Access the app:**
+
 - Frontend: http://localhost:5173
 - Backend API: http://localhost:8000
 
@@ -224,53 +347,101 @@ npm run dev
 ## API Endpoints
 
 ### Authentication
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/auth/signup` | Create recruiter account |
-| `POST` | `/api/auth/login` | Authenticate recruiter |
-| `GET` | `/api/auth/profile` | Get current profile (auth required) |
-| `PATCH` | `/api/auth/profile` | Update profile (auth required) |
-| `POST` | `/api/auth/refresh` | Refresh JWT token |
+
+| Method  | Endpoint            | Description                         |
+| ------- | ------------------- | ----------------------------------- |
+| `POST`  | `/api/auth/signup`  | Create recruiter account            |
+| `POST`  | `/api/auth/login`   | Authenticate recruiter              |
+| `GET`   | `/api/auth/profile` | Get current profile (auth required) |
+| `PATCH` | `/api/auth/profile` | Update profile (auth required)      |
+| `POST`  | `/api/auth/refresh` | Refresh JWT token                   |
 
 ### Jobs (Authenticated)
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/jobs/` | List recruiter's jobs |
-| `POST` | `/api/jobs/` | Create new job |
-| `GET` | `/api/jobs/{id}/` | Get job details |
-| `PATCH` | `/api/jobs/{id}/` | Update job |
-| `DELETE` | `/api/jobs/{id}/` | Delete job |
-| `GET` | `/api/jobs/{id}/applicants/` | List job applicants |
-| `GET` | `/api/jobs/stats/` | Get job statistics |
+
+| Method   | Endpoint                     | Description           |
+| -------- | ---------------------------- | --------------------- |
+| `GET`    | `/api/jobs/`                 | List recruiter's jobs |
+| `POST`   | `/api/jobs/`                 | Create new job        |
+| `GET`    | `/api/jobs/{id}/`            | Get job details       |
+| `PATCH`  | `/api/jobs/{id}/`            | Update job            |
+| `DELETE` | `/api/jobs/{id}/`            | Delete job            |
+| `GET`    | `/api/jobs/{id}/applicants/` | List job applicants   |
+| `GET`    | `/api/jobs/stats/`           | Get job statistics    |
 
 ### Jobs (Public)
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/jobs/public/` | List active jobs |
-| `GET` | `/api/jobs/public/{id}/` | Get job details |
-| `GET` | `/api/jobs/filters/` | Get filter options |
-| `POST` | `/api/jobs/{id}/apply/` | Submit application |
+
+| Method | Endpoint                 | Description        |
+| ------ | ------------------------ | ------------------ |
+| `GET`  | `/api/jobs/public/`      | List active jobs   |
+| `GET`  | `/api/jobs/public/{id}/` | Get job details    |
+| `GET`  | `/api/jobs/filters/`     | Get filter options |
+| `POST` | `/api/jobs/{id}/apply/`  | Submit application |
 
 ### Applicants (Authenticated)
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/applicants/` | List all applicants |
-| `GET` | `/api/applicants/{id}/` | Get applicant details |
-| `PATCH` | `/api/applicants/{id}/` | Update status/notes |
-| `DELETE` | `/api/applicants/{id}/` | Delete applicant |
-| `GET` | `/api/applicants/{id}/resume/` | Download resume |
-| `GET` | `/api/applicants/stats/` | Get statistics |
+
+| Method   | Endpoint                       | Description           |
+| -------- | ------------------------------ | --------------------- |
+| `GET`    | `/api/applicants/`             | List all applicants   |
+| `GET`    | `/api/applicants/{id}/`        | Get applicant details |
+| `PATCH`  | `/api/applicants/{id}/`        | Update status/notes   |
+| `DELETE` | `/api/applicants/{id}/`        | Delete applicant      |
+| `GET`    | `/api/applicants/{id}/resume/` | Download resume       |
+| `GET`    | `/api/applicants/stats/`       | Get statistics        |
+
+## AI Scoring System
+
+### How It Solves the Recruiter's Problem
+
+**The Problem**: A recruiter posts a Software Engineer role requiring Python, React, and 3+ years experience. They receive 200 applications. Reading each resume for 3 minutes = **10 hours of manual work**.
+
+**The Solution**: AI analyzes all 200 resumes in parallel, scoring each against the job requirements. Recruiter reviews only the top-scored 40 candidates (20%) = **2 hours of focused work**.
+
+### Job Relevancy Score (0-100)
+
+_For quick reference during applicant review_
+
+The AI doesn't just parse resumes - it **understands context and relevance to the specific job**.
+
+| Score  | Rating          | What It Means                                                    | Recruiter Action              |
+| ------ | --------------- | ---------------------------------------------------------------- | ----------------------------- |
+| 90-100 | Excellent Match | Has most required skills, relevant experience, strong background | **Interview immediately**     |
+| 70-89  | Good Match      | Many required skills, minor gaps fillable, solid potential       | **Review in detail**          |
+| 50-69  | Partial Match   | Some relevant skills, significant gaps, may need training        | **Consider for junior roles** |
+| 30-49  | Weak Match      | Limited relevant experience, major skill mismatches              | **Likely reject**             |
+| 0-29   | Poor Match      | Background doesn't align with requirements, wrong career path    | **Auto-reject or quick skim** |
+
+### What the AI Evaluates
+
+1. **Skill Matching**: Does the candidate have Python, React, AWS? (explicit matches)
+2. **Experience Level**: 5 years experience > 1 year when job requires 3+
+3. **Domain Knowledge**: E-commerce background for e-commerce role (contextual understanding)
+4. **Education Relevance**: CS degree for technical roles, MBA for business roles
+5. **Career Trajectory**: Promotions, leadership, consistent growth patterns
+
+### Real Example Output
+
+```
+Candidate: Sarah Chen
+Score: 92/100 (Excellent Match)
+
+✅ Skill Matches: Python, Django, React, TypeScript, PostgreSQL, AWS
+❌ Skill Gaps: Kubernetes (minor)
+
+Summary: "Strong full-stack engineer with 5 years experience in similar tech stack.
+Led team of 4 developers. Built scalable e-commerce platforms handling 100K+ daily users."
+
+Recruiter sees this in 5 seconds instead of reading 3-page resume.
+```
 
 ## Scoring Guidelines
 
-### Job Relevancy Score (0-100)
-| Score | Rating | Meaning |
-|-------|--------|---------|
+| Score  | Rating          | Meaning                                       |
+| ------ | --------------- | --------------------------------------------- |
 | 90-100 | Excellent Match | Has most required skills, relevant experience |
-| 70-89 | Good Match | Many required skills, some gaps fillable |
-| 50-69 | Partial Match | Some relevant skills, significant gaps |
-| 30-49 | Weak Match | Limited relevant experience |
-| 0-29 | Poor Match | Background doesn't align with requirements |
+| 70-89  | Good Match      | Many required skills, some gaps fillable      |
+| 50-69  | Partial Match   | Some relevant skills, significant gaps        |
+| 30-49  | Weak Match      | Limited relevant experience                   |
+| 0-29   | Poor Match      | Background doesn't align with requirements    |
 
 ## Response Format
 
@@ -294,24 +465,24 @@ All API responses follow this structure:
 ### Common Issues
 
 1. **"Supabase credentials not configured"**
+
    - Ensure `.env` file exists with `SUPABASE_URL` and `SUPABASE_KEY`
 
 2. **"Failed to analyze resume"**
+
    - Check your `GEMINI_API_KEY` is valid
    - Ensure the file is not corrupted
 
 3. **CORS errors in browser**
+
    - Backend must be running on port 8000
    - Frontend must be running on port 5173
 
 4. **"Authentication required"**
+
    - Token may have expired (24h default)
    - Login again to get a new token
 
 5. **File upload fails**
    - Max file size is 10MB
    - Only PDF, DOC, DOCX, TXT are supported
-
-## License
-
-ISC
