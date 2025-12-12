@@ -15,11 +15,6 @@
       "dest": "ats_backend/wsgi.py"
     }
   ],
-  "functions": {
-    "ats_backend/wsgi.py": {
-      "runtime": "python3.9"
-    }
-  },
   "env": {
     "DJANGO_SETTINGS_MODULE": "ats_backend.settings"
   }
