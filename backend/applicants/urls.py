@@ -6,10 +6,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # Upload resume with AI analysis
-    path('upload', views.ApplicantUploadView.as_view(), name='applicant-upload'),
-    
-    # List all applicants
+    # List all applicants (authenticated recruiters)
     path('', views.ApplicantListView.as_view(), name='applicant-list'),
     
     # Get applicant statistics

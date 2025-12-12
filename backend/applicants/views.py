@@ -18,7 +18,9 @@ from core.responses import (
 )
 from . import services
 from .models import ApplicantCreateInput, ApplicantUpdateInput
-from .ai_service import analyze_resume_from_file
+from .ai_service import analyze_resume_from_file, analyze_resume_file_for_job
+from auth.decorators import require_auth
+from jobs import services as job_services
 from .serializers import ApplicantUpdateSerializer
 
 
@@ -114,9 +116,215 @@ class ApplicantUploadView(APIView):
             )
 
 
+class JobApplicationView(APIView):
+    """Handle public job applications."""
+    parser_classes = [MultiPartParser, FormParser]
+    
+    def post(self, request, job_id):
+        """
+        Submit a job application (public endpoint).
+        
+        POST /api/jobs/{job_id}/apply/
+        """
+        try:
+            # Verify job exists and is active
+            job = job_services.get_public_job_by_id(str(job_id))
+            if not job:
+                return create_not_found_response(
+                    "Job posting not found or not accepting applications",
+                    request
+                )
+            
+            # Validate required fields
+            name = request.data.get('name', '').strip()
+            email = request.data.get('email', '').strip()
+            phone = request.data.get('phone', '').strip()
+            
+            if not name:
+                return create_error_response(
+                    "Name is required",
+                    request,
+                    error_code="VALIDATION_ERROR",
+                    status_code=status.HTTP_400_BAD_REQUEST
+                )
+            
+            if not email:
+                return create_error_response(
+                    "Email is required",
+                    request,
+                    error_code="VALIDATION_ERROR",
+                    status_code=status.HTTP_400_BAD_REQUEST
+                )
+            
+            if not phone:
+                return create_error_response(
+                    "Phone is required",
+                    request,
+                    error_code="VALIDATION_ERROR",
+                    status_code=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Check if file was uploaded
+            if 'resume' not in request.FILES:
+                return create_error_response(
+                    "Resume file is required",
+                    request,
+                    error_code="NO_FILE",
+                    status_code=status.HTTP_400_BAD_REQUEST
+                )
+            
+            uploaded_file = request.FILES['resume']
+            
+            # Validate file size
+            if uploaded_file.size > settings.MAX_UPLOAD_SIZE:
+                return create_error_response(
+                    f"File too large. Maximum size is {settings.MAX_UPLOAD_SIZE / (1024 * 1024):.0f}MB",
+                    request,
+                    error_code="FILE_TOO_LARGE",
+                    status_code=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Validate file type
+            if uploaded_file.content_type not in settings.ALLOWED_UPLOAD_TYPES:
+                return create_error_response(
+                    "Invalid file type. Only PDF, DOC, DOCX, and TXT files are allowed.",
+                    request,
+                    error_code="INVALID_FILE_TYPE",
+                    status_code=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Generate unique filename
+            ext = os.path.splitext(uploaded_file.name)[1]
+            unique_filename = f"{uuid.uuid4()}{ext}"
+            file_path = os.path.join(settings.UPLOAD_DIR, unique_filename)
+            
+            # Save file to disk
+            with open(file_path, 'wb') as f:
+                for chunk in uploaded_file.chunks():
+                    f.write(chunk)
+            
+            try:
+                # Perform general resume analysis
+                general_analysis = analyze_resume_from_file(file_path)
+                
+                # Perform job-specific analysis
+                job_analysis = analyze_resume_file_for_job(
+                    file_path,
+                    job_title=job.get('title', ''),
+                    job_requirements=job.get('requirements', ''),
+                    job_description=job.get('description', '')
+                )
+                
+                # Create applicant record
+                input_data = ApplicantCreateInput(
+                    name=name,
+                    email=email,
+                    phone=phone,
+                    resume_file_path=file_path,
+                    # General analysis
+                    priority_score=general_analysis['priority_score'],
+                    summary=general_analysis['summary'],
+                    key_skills=general_analysis['key_skills'],
+                    experience=general_analysis['experience'],
+                    education=general_analysis['education'],
+                    highlights=general_analysis['highlights'],
+                    concerns=general_analysis['concerns'],
+                    # Job-specific analysis
+                    job_posting_id=str(job_id),
+                    job_relevancy_score=job_analysis['job_relevancy_score'],
+                    job_match_summary=job_analysis['job_match_summary'],
+                    skill_matches=job_analysis['skill_matches'],
+                    skill_gaps=job_analysis['skill_gaps'],
+                )
+                
+                applicant = services.create_applicant(input_data)
+                
+                return create_success_response(
+                    "Application submitted successfully",
+                    {
+                        "applicationId": applicant['id'],
+                        "message": "Thank you for applying! We will review your application and get back to you."
+                    },
+                    request,
+                    status_code=status.HTTP_201_CREATED
+                )
+                
+            except Exception as e:
+                # Clean up file if analysis/creation fails
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                raise e
+                
+        except Exception as e:
+            print(f"Error submitting application: {e}")
+            return create_server_error_response(
+                f"Failed to submit application: {str(e)}",
+                request
+            )
+
+
+class JobApplicantsView(APIView):
+    """List applicants for a specific job posting."""
+    
+    @require_auth
+    def get(self, request, job_id):
+        """
+        Get all applicants for a job posting.
+        
+        GET /api/jobs/{job_id}/applicants/?sortBy=jobRelevancyScore&order=desc&status=new
+        """
+        try:
+            # Verify job exists and belongs to recruiter
+            job = job_services.get_job_by_id(str(job_id))
+            if not job:
+                return create_not_found_response(
+                    "Job posting not found",
+                    request
+                )
+            
+            if job['recruiterId'] != request.recruiter_id:
+                return create_error_response(
+                    "Not authorized to view applicants for this job",
+                    request,
+                    error_code="FORBIDDEN",
+                    status_code=status.HTTP_403_FORBIDDEN
+                )
+            
+            sort_by = request.query_params.get('sortBy', 'jobRelevancyScore')
+            order = request.query_params.get('order', 'desc')
+            status_filter = request.query_params.get('status')
+            
+            applicants = services.get_applicants_by_job(
+                str(job_id),
+                sort_by=sort_by,
+                order=order,
+                status=status_filter
+            )
+            
+            stats = services.get_job_applicant_stats(str(job_id))
+            
+            return create_success_response(
+                "Applicants retrieved successfully",
+                {
+                    "applicants": applicants,
+                    "stats": stats,
+                    "job": job,
+                },
+                request
+            )
+            
+        except Exception as e:
+            print(f"Error fetching job applicants: {e}")
+            return create_server_error_response(
+                "Failed to fetch applicants",
+                request
+            )
+
+
 class ApplicantListView(APIView):
     """List all applicants with filtering and sorting."""
     
+    @require_auth
     def get(self, request):
         """
         Get all applicants.
@@ -147,6 +355,7 @@ class ApplicantListView(APIView):
 class ApplicantStatsView(APIView):
     """Get applicant statistics."""
     
+    @require_auth
     def get(self, request):
         """
         Get aggregated statistics.
@@ -173,6 +382,7 @@ class ApplicantStatsView(APIView):
 class ApplicantDetailView(APIView):
     """Get, update, or delete a single applicant."""
     
+    @require_auth
     def get(self, request, applicant_id):
         """
         Get a single applicant by ID.
@@ -201,6 +411,7 @@ class ApplicantDetailView(APIView):
                 request
             )
     
+    @require_auth
     def patch(self, request, applicant_id):
         """
         Update an applicant's status or notes.
@@ -251,6 +462,7 @@ class ApplicantDetailView(APIView):
                 request
             )
     
+    @require_auth
     def delete(self, request, applicant_id):
         """
         Delete an applicant and their resume file.
@@ -292,6 +504,7 @@ class ApplicantDetailView(APIView):
 class ApplicantResumeDownloadView(APIView):
     """Download an applicant's resume file."""
     
+    @require_auth
     def get(self, request, applicant_id):
         """
         Download the resume file.

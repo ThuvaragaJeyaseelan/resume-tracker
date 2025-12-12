@@ -44,6 +44,12 @@ def _parse_applicant(data: Dict[str, Any]) -> Dict[str, Any]:
         'education': data.get('education'),
         'highlights': data.get('highlights') or [],
         'concerns': data.get('concerns') or [],
+        # Job-specific fields
+        'jobRelevancyScore': data.get('job_relevancy_score', 0),
+        'jobMatchSummary': data.get('job_match_summary'),
+        'skillMatches': data.get('skill_matches') or [],
+        'skillGaps': data.get('skill_gaps') or [],
+        # Status and tracking
         'status': data.get('status', 'new'),
         'notes': data.get('notes'),
         'jobPostingId': data.get('job_posting_id'),
@@ -83,6 +89,11 @@ def create_applicant(input_data: ApplicantCreateInput) -> Dict[str, Any]:
         'highlights': input_data.highlights,
         'concerns': input_data.concerns,
         'job_posting_id': input_data.job_posting_id,
+        # Job-specific fields
+        'job_relevancy_score': input_data.job_relevancy_score or 0,
+        'job_match_summary': input_data.job_match_summary,
+        'skill_matches': input_data.skill_matches,
+        'skill_gaps': input_data.skill_gaps,
     }
     
     # Remove None values
@@ -260,5 +271,93 @@ def get_applicant_stats() -> Dict[str, Any]:
         'total': total,
         'byStatus': by_status,
         'avgScore': round(avg_score, 1),
+    }
+
+
+def get_applicants_by_job(
+    job_id: str,
+    sort_by: str = 'job_relevancy_score',
+    order: str = 'desc',
+    status: Optional[str] = None
+) -> List[Dict[str, Any]]:
+    """
+    Get all applicants for a specific job posting.
+    
+    Args:
+        job_id: UUID of the job posting
+        sort_by: Field to sort by (default: job_relevancy_score)
+        order: Sort order ('asc' or 'desc')
+        status: Optional status filter
+        
+    Returns:
+        List of applicant data sorted by relevancy
+    """
+    supabase = get_supabase_client()
+    
+    # Map frontend field names to database field names
+    field_map = {
+        'jobRelevancyScore': 'job_relevancy_score',
+        'job_relevancy_score': 'job_relevancy_score',
+        'priorityScore': 'priority_score',
+        'priority_score': 'priority_score',
+        'createdAt': 'created_at',
+        'created_at': 'created_at',
+    }
+    
+    db_sort_field = field_map.get(sort_by, 'job_relevancy_score')
+    
+    query = supabase.table('applicants') \
+        .select('*, job_postings(*)') \
+        .eq('job_posting_id', job_id)
+    
+    if status:
+        query = query.eq('status', status)
+    
+    query = query.order(db_sort_field, desc=(order == 'desc'))
+    
+    result = query.execute()
+    
+    return [_parse_applicant(item) for item in (result.data or [])]
+
+
+def get_job_applicant_stats(job_id: str) -> Dict[str, Any]:
+    """
+    Get applicant statistics for a specific job.
+    
+    Args:
+        job_id: UUID of the job posting
+        
+    Returns:
+        Statistics for the job's applicants
+    """
+    supabase = get_supabase_client()
+    
+    result = supabase.table('applicants') \
+        .select('id, status, job_relevancy_score') \
+        .eq('job_posting_id', job_id) \
+        .execute()
+    
+    applicants = result.data or []
+    
+    total = len(applicants)
+    by_status = {}
+    total_score = 0
+    high_matches = 0  # Score >= 70
+    
+    for applicant in applicants:
+        status = applicant.get('status', 'new')
+        by_status[status] = by_status.get(status, 0) + 1
+        score = applicant.get('job_relevancy_score', 0)
+        total_score += score
+        if score >= 70:
+            high_matches += 1
+    
+    avg_score = total_score / total if total > 0 else 0
+    
+    return {
+        'total': total,
+        'byStatus': by_status,
+        'avgRelevancyScore': round(avg_score, 1),
+        'highMatches': high_matches,
     }
 
