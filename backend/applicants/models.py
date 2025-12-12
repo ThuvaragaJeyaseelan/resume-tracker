@@ -30,7 +30,7 @@ class Applicant:
     phone: Optional[str] = None
     resume_text: Optional[str] = None
     
-    # AI Analysis Fields
+    # General AI Analysis Fields
     priority_score: int = 0
     summary: Optional[str] = None
     key_skills: Optional[List[str]] = None
@@ -38,6 +38,12 @@ class Applicant:
     education: Optional[str] = None
     highlights: Optional[List[str]] = None
     concerns: Optional[List[str]] = None
+    
+    # Job-Specific AI Analysis Fields
+    job_relevancy_score: int = 0
+    job_match_summary: Optional[str] = None
+    skill_matches: Optional[List[str]] = None
+    skill_gaps: Optional[List[str]] = None
     
     # Status Tracking
     status: str = 'new'
@@ -76,6 +82,11 @@ class ApplicantCreateInput:
     highlights: Optional[List[str]] = None
     concerns: Optional[List[str]] = None
     job_posting_id: Optional[str] = None
+    # Job-specific fields
+    job_relevancy_score: int = 0
+    job_match_summary: Optional[str] = None
+    skill_matches: Optional[List[str]] = None
+    skill_gaps: Optional[List[str]] = None
 
 
 @dataclass
