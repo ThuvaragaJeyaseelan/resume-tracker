@@ -139,8 +139,7 @@ The AI system addresses the fundamental recruiter challenge: **screening hundred
 
 ## Known Limitations
 
-- **File storage in Vercel**: Uses `/tmp/uploads` (temporary storage). Files don't persist between Vercel function calls, so resume downloads fail after deployment restart. **Current limitation for demo purposes** - production needs Supabase Storage or cloud storage.
-- **Resume downloads**: Currently broken in Vercel due to ephemeral storage. Upload and AI analysis work perfectly, but files disappear on function restart.
+- **File storage**: Resumes stored locally on backend server. Won't persist on Vercel serverless (needs cloud storage).
 - **Rate limits**: Gemini API has rate limits. Bulk resume analysis may fail with too many concurrent uploads.
 - **No real-time updates**: Dashboard doesn't auto-refresh when new applicants arrive. Requires manual refresh.
 - **Single recruiter context**: No multi-tenancy isolation beyond recruiter_id foreign keys.
@@ -487,9 +486,3 @@ All API responses follow this structure:
 5. **File upload fails**
    - Max file size is 10MB
    - Only PDF, DOC, DOCX, TXT are supported
-
-6. **Resume download fails in Vercel**
-   - This is expected! Files are stored in `/tmp` which doesn't persist
-   - Upload and AI analysis work perfectly for demo purposes
-   - Production would need Supabase Storage implementation
-   - Shows the core AI matching feature works without needing downloads
